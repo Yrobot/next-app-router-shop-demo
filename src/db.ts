@@ -38,7 +38,16 @@ const getSource = async (): Promise<Source> => {
 export default {
   list: async ({ offset = 0, size = 10 } = {}) => {
     const { ids, map } = await getSource();
-    return ids.slice(offset, offset + size).map((id) => map[id]);
+    return ids.slice(offset, offset + size).map((id) => {
+      const { description, ...item } = map[id] || {};
+      return item;
+    });
   },
-  ids: async () => [],
+  ids: async () => {
+    return (await getSource()).ids;
+  },
+  size: async () => {
+    return (await getSource()).ids.length;
+  },
+  detail: async (id: string) => (await getSource()).map[id],
 };

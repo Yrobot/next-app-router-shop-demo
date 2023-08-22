@@ -13,6 +13,13 @@
                 "import path from \"node:path\";\nimport fs from \"node:fs\";\nimport https from \"node:https\";\n\nconst downloadImage = async ({ url, folder, name }) =>\n  new Promise((resolve, reject) => {\n    const ext = url.split(\".\").at(-1)?.split(/\\#|\\?/)[0];\n    const filePath = path.join(folder, `${name}.${ext}`);\n    https\n      .get(url, (response) => {\n        const fileStream = fs.createWriteStream(filePath);\n        response.pipe(fileStream);\n\n        fileStream.on(\"finish\", () => {\n          fileStream.close();\n          console.log(\"Image Saved: \", filePath);\n          resolve(filePath.replace(path.join(__dirname, \"public\"), \"\"));\n        });\n      })\n      .on(\"error\", (err) => {\n        console.log(\"Error: \", err.message);\n        reject(err);\n      });\n  });\n\nconst handleImages = async ({ folder, images = [], id = \"\" }) =>\n  await Promise.all(\n    images.map(({ url, width = 0, height = 0 }, index) =>\n      downloadImage({\n        folder,\n        url,\n        name: `${index}_${width}x${height}`,\n      })\n    )\n  );\n\nconst productHandler = async (product) => {\n  const dirPath = path.join(__dirname, \"public/products/\", product.id);\n  const imagesPath = path.join(dirPath, \"images\");\n  // Create folder\n  await fs.mkdirSync(imagesPath, { recursive: true });\n  const data = {\n    ...product,\n    images: await handleImages({\n      folder: imagesPath,\n      images: product?.images,\n    }),\n  };\n  await fs.writeFileSync(path.join(dirPath, \"data.json\"), JSON.stringify(data));\n};\n\n(async () => {\n  await Object.entries(source).map(([id, data]) =>\n    productHandler({\n      ...data,\n      id,\n    })\n  );\n})().catch(console.error);\n"
             ],
             "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(JSON.stringify(list.map((item) => item.id)));\n"
+            ],
+            "outputs": []
         }
     ]
 }

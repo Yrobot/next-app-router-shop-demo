@@ -2,11 +2,10 @@
 
 import React, { useState, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroller";
-import Loading from "@/components/Loading";
+import Loading from "@/components/basic/Loading";
+import ListCard from "@/components/ListCard";
 
 import type { Product } from "@/types";
-
-type ProductListItem = Omit<Product, "description">;
 
 const PAGE_SIZE = 10;
 
@@ -16,13 +15,13 @@ function List({
   size,
 }: {
   size: number;
-  initialItems: ProductListItem[];
-  fetch: (params: { offset: number }) => Promise<ProductListItem[]>;
+  initialItems: Product[];
+  fetch: (params: { offset: number }) => Promise<Product[]>;
 }) {
   const dataRef = useRef({
     fetching: false,
   });
-  const [pages, setPages] = useState<ProductListItem[][]>([initialItems]);
+  const [pages, setPages] = useState<Product[][]>([initialItems]);
   const items = pages.flat();
 
   return (
@@ -42,20 +41,15 @@ function List({
         }
       }}
       loader={
-        <li className="flex w-96 items-center justify-center py-4" key={-1}>
+        <div className="flex w-96 items-center justify-center py-4" key={-1}>
           <Loading size="lg" />
-        </li>
+        </div>
       }
-      className="flex flex-col items-center justify-center space-y-4"
-      element="ol"
+      className="mx-auto flex max-w-2xl flex-col items-center justify-center space-y-4"
+      element="div"
     >
-      {items.map(({ id }) => (
-        <li
-          className="card flex h-[200px] w-[600px] items-center justify-center p-4 shadow-xl"
-          key={id}
-        >
-          <h2 className="card-title"> {id}</h2>
-        </li>
+      {items.map((product) => (
+        <ListCard key={product.id} {...product} />
       ))}
     </InfiniteScroll>
   );
